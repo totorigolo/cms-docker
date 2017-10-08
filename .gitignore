@@ -1,2 +1,7 @@
 # IntelliJ project files
 .idea
+aws-test-1.py
+*.json
+*.pem
+*.conf
+logo.png

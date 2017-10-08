@@ -20,19 +20,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         haskell-platform            \
         python3.5                   \
         mono-devel                  \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*  \
+    && ln -s /usr/bin/python3.5 /usr/bin/python3
 
 
 # CMS
 RUN apt-get update && apt-get install -y --no-install-recommends git
 ADD https://api.github.com/repos/totorigolo/cms/git/refs/heads/v1.3 /cms-version.json
 RUN git clone --recursive https://github.com/totorigolo/cms.git -b v1.3 /cms
+COPY logo.png /cms/cms/server/contest/static/img/
 RUN cd /cms && pip2 install -r requirements.txt
 RUN cd /cms && ./prerequisites.py install --as-root
 RUN cd /cms && ./setup.py build && ./setup.py install && rm -rf /cms
 
-## Copy the CMS configuration files generator
-COPY generate-cms-conf.py /
+## Copy the CMS configuration files
+COPY cms.conf cms.ranking.conf /usr/local/etc/
 
 ## Create the log directory
 RUN mkdir -p /var/local/log/cms/

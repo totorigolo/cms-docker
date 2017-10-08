@@ -5,14 +5,9 @@
 set -e
 
 
-## Generate CMS configuration
-python generate-cms-conf.py
-mv cms.conf cms.ranking.conf /usr/local/etc/
-
-
 ## Launch CMS if a contest id is given
 # Get the contest to launch, defined in the CMS_contest env variable
-contest="${CMS_contest:-0}"
+contest="${CMS_contest:-1}"
 
 if [ ${contest} -gt 0 ]; then
     # Optionnaly launch the Ranking Web Server
