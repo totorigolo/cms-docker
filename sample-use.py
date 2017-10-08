@@ -29,14 +29,16 @@ if __name__ == '__main__':
             + '-c --config to create CMS config files, create a Docker container and push it.\n'
             + '-d --deploy to deploy CMS on AWS.\n'
             + '-t --terminate to terminate a deployment saved in <id>.json.')
+        exit(1)
 
     # Get the action
     deploy = sys.argv[1] in ['-d', '--deploy']
     terminate = sys.argv[1] in ['-t', '--terminate']
     config = sys.argv[1] in ['-c', '--config']
-    if not deploy and not config:
+    if not deploy and not terminate and not config:
         log('critical', 'First argument invalid. '
             + 'Candidates: -d (--deploy), -t (--terminate) and -c (--config).')
+        exit(1)
 
     # Create an EC2 manager
     ec2Manager_id = sys.argv[2]

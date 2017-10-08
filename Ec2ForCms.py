@@ -596,6 +596,7 @@ class Manager:
                 self.elb.delete_load_balancer(LoadBalancerArn=load_balancer_arn)
                 log('info', "Load balancer '%s' deleted." % load_balancer_arn)
                 del self.state_dict['load_balancer_arn']
+                del self.state_dict['load_balancer_dnsname']
             except Exception as e:
                 log('warning', "Can't delete the load balancer '%s': %s" % (load_balancer_arn, e))
 
