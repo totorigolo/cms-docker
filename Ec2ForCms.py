@@ -612,9 +612,25 @@ class Manager:
 
         # Delete the LB security group
         if 'lb_security_group_id' in self.state_dict:
-            import time
-            time.sleep(5)
             lb_security_group_id = self.state_dict['lb_security_group_id']
+
+            # Delete LB network interfaces
+            lb_network_interfaces_ids = [ni['NetworkInterfaceId'] for ni in (
+                self.ec2c.describe_network_interfaces(
+                    Filters=[{'Name': 'group-id', 'Values': [lb_security_group_id]}]
+                )['NetworkInterfaces'])]
+            print('lb_network_interfaces_ids', lb_network_interfaces_ids)
+            for lb_network_interfaces_id in lb_network_interfaces_ids:
+                try:
+                    network_interface = self.ec2r.NetworkInterface(lb_network_interfaces_id)
+                    network_interface.delete()
+                    log('info', "LB network interface '%s' deleted." % lb_network_interfaces_id)
+                except Exception as e:
+                    log('warning', "Can't delete the LB network interface '%s': %s"
+                        % (lb_network_interfaces_id, e))
+            import time
+            time.sleep(10)
+
             try:
                 self.ec2c.delete_security_group(GroupId=lb_security_group_id)
                 log('info', "LB security group '%s' deleted." % lb_security_group_id)
@@ -725,6 +741,18 @@ class Manager:
                 del self.state_dict['vpc_id']
             except Exception as e:
                 log('warning', "Can't delete the VPC '%s': %s" % (vpc_id, e))
+
+        # Delete the keypair
+        if 'keypair_name' in self.state_dict:
+            keypair_name = self.state_dict['keypair_name']
+            try:
+                key_pair = self.ec2r.KeyPair(keypair_name)
+                key_pair.delete()
+                log('info', "Keypair '%s' deleted." % keypair_name)
+                del self.state_dict['keypair_name']
+                os.remove(keypair_name + '.pem')
+            except Exception as e:
+                log('warning', "Can't delete the keypair '%s': %s" % (keypair_name, e))
 
         # Save the new configuration
         self.save_to_file()
